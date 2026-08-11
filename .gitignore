@@ -1,0 +1,28 @@
+# secrets - NEVER commit
+.env
+.env.*
+*.key
+credentials.json
+ 
+# python
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+ 
+# local data / caches
+*.db
+*.sqlite3
+data/
+.cache/
+ 
+# editor / os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+ 
+# outputs you don't want in the repo
+logs/
+*.log
