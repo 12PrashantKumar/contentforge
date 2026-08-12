@@ -23,3 +23,9 @@ def require_env(name: str) -> str:
 # Required API keys
 GROQ_API_KEY = require_env("GROQ_API_KEY")
 TAVILY_API_KEY = require_env("TAVILY_API_KEY")
+
+# Has a sensible default, so it doesn't need require_env().
+GROQ_MODEL = os.getenv(
+    "GROQ_MODEL",
+    "llama-3.3-70b-versatile",
+)
