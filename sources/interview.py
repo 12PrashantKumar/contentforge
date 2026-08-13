@@ -46,7 +46,11 @@ _CHOICES = {
         "label": "Made progress, still building",
         "is_first_party": True, "has_real_completion": False,
         "has_real_failure": False, "has_real_measurement": False,
-        "followup": "What did you move forward, and what's the mechanism (A -> B -> C)?",
+        "followup": (
+            "Two things: (1) the mechanism as A -> B -> C, and (2) one detail a "
+            "builder would find non-obvious — a tradeoff, a surprise, something "
+            "that took longer than expected, or why you did it this way."
+        ),
     },
     "3": {  # something broke  -> FAILURE_LESSON  (note: first_party False)
         "label": "Something broke / I got something wrong",
@@ -119,8 +123,12 @@ def run_interview(days: int = 7) -> InterviewResult | None:
 
     # build the first-party finding: commits give the WHAT, your answer gives the WHY
     content = (
-        f"WORK CONTEXT (from commits):\n{item.summary()}\n\n"
-        f"WHAT ACTUALLY HAPPENED (author's own account):\n{story}"
+        f"PRIMARY MATERIAL — write the post from THIS. It is the author's own "
+        f"first-hand account of the work and contains the non-obvious detail:\n\n"
+        f"{story}\n\n"
+        f"---\n"
+        f"BACKGROUND CONTEXT (commit log — use only to ground facts, do NOT "
+        f"just restate these as the post):\n{item.summary()}"
     )
 
     finding = Finding(

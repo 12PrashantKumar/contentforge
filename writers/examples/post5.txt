@@ -1,0 +1,3 @@
+split the pipeline into explicit langgraph nodes. research → strategy → write → verify.
+
+people think the value is the graph. it isn't. it's that every node returns a status, so a break surfaces as an error state instead of quietly handing empty data to the next step. i'd rather a loud failure than a clean-looking wrong answer.

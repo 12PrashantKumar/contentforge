@@ -1,0 +1,3 @@
+my ingest script was loading a 400MB embedding model once per folder. three folders, three loads.
+
+moved it to module scope. ingest dropped by a third and the silent OOM kills on long runs stopped. added an idempotency check while I was in there so re-runs skip what's already embedded.

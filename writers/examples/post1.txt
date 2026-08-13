@@ -1,5 +1,5 @@
-Built a RAG pipeline from scratch this week — no LangChain, just native Python.
+Built a RAG pipeline from scratch this week no LangChain, just native Python.
 
 pypdf chunking → MiniLM embeddings → ChromaDB → Gemini, grounded only in retrieved passages.
 
-If it's not in the context, it says "not enough info" — no hallucinating.
+If it's not in the context, it says "not enough info" no hallucinating.

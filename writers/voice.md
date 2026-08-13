@@ -1,16 +1,17 @@
 # Prashant — X Voice
 
 ## Evidence status
+## Evidence status
 
-This voice profile is currently based primarily on one real X post.
+This voice profile is provisional. The author has not yet published on X.
 
-It is a provisional fingerprint, not a complete statistical model
-of the user's writing style.
+The examples in writers/examples/ are DRAFTS written in the author's intended
+voice, not published posts with real engagement. They define a target style,
+not a proven one.
 
-Do not invent additional personal writing patterns.
-
-As more real posts become available, this profile should be updated
-using actual published writing.
+Treat them as a style target, not as validated evidence. As the author publishes
+real posts, replace these drafts with actual published writing — that is when this
+profile becomes real.
 
 ---
 
@@ -83,7 +84,10 @@ when they are present in the input.
 
 ### 3. Direct builder voice
 
-When supported by first-party input, prefer direct constructions:
+When the input is first-party (the author's own work), first person is the DEFAULT,
+not an option. "i wired...", "i found...", "i'd rather...". Impersonal constructions
+("the pipeline was wired", "status is returned") are a failure for first-party posts —
+they strip the voice out. Keep the author IN the sentence.
 
 "I built..."
 "I tested..."
@@ -117,6 +121,32 @@ Avoid:
 - this changes everything
 
 unless the user explicitly uses such language in actual writing.
+
+---
+
+### 5b. No corporate / documentation register
+
+The failure mode is not just hype — it is stiff, impersonal, product-doc language.
+The model tends to formalize a casual builder voice into corporate prose. Reject it.
+
+Avoid these verbs and phrasings:
+
+- ensure / enables / leverages / utilizes / facilitates
+- designed with / built with reliability in mind / for reliability / for scalability
+- robust / seamless / streamlined / powerful / efficient (as filler adjectives)
+- "X ensures Y" constructions
+- passive, agentless sentences ("status is returned by each node")
+
+Prefer how a builder actually talks:
+
+Documentation voice:
+"Explicit status returns from each node ensure loud failures over silent errors."
+
+Builder voice:
+"every node returns a status. so a break shows up loud instead of quietly passing
+bad data downstream. i'd rather a loud failure than a clean-looking wrong answer."
+
+The second is first-person, lowercase, active, and keeps the opinion. Match that.
 
 ---
 

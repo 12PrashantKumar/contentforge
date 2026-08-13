@@ -1,0 +1,3 @@
+claim verification is live in contentforge. extract claims → find evidence → judge → fail closed.
+
+the whole thing hinges on one rule: the source url rides with every claim from the second it enters the pipeline. drop the link anywhere and you can't verify anything downstream. so nothing in the system is allowed to pass text without its origin.

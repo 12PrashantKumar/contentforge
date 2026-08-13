@@ -39,8 +39,11 @@ failure: correct facts, wrong register.
 ```
 
 Rules: no number unless it was measured. Screenshot beats description. Never
-explain why the project matters — the sequence does that over weeks.
-
+explain why the project matters — the sequence does that over weeks. The third
+element must be earned insight, not a formula — vary how you deliver it (a
+reframe, a tradeoff, a constraint, a surprise, an opinion). Never open it with
+the same stock phrase twice; if every ship log ends "the non-obvious part is…",
+the feed reads as a template.
 ---
 
 ## 2. BUILD_ANNOUNCE
