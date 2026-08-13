@@ -52,3 +52,54 @@ class Draft:
     source_url: str
     rejected_angle: str | None = None
     notes: str | None = None
+
+@dataclass
+class Claim:
+    """
+    One factual claim extracted from a draft.
+
+    The claim keeps the complete verification trail:
+    claim -> source -> evidence -> verdict -> model.
+    """
+
+    claim_text: str
+    source_url: str
+    evidence_text: str = ""
+    evidence_location: str = ""
+    verdict: str = "NO_EVIDENCE"
+    judged_by: str = ""
+
+    @property
+    def is_supported(self) -> bool:
+        """
+        True only when the claim has been explicitly
+        judged as supported.
+        """
+
+        return self.verdict == "SUPPORTED"
+
+
+@dataclass
+class VerificationResult:
+    """
+    Complete verification result for a draft.
+    """
+
+    status: str
+    claims: list[Claim]
+    blocked_reasons: list[str] | None = None
+
+    @property
+    def is_verified(self) -> bool:
+        """
+        A draft is verified only if every claim
+        is supported.
+        """
+
+        return (
+            self.status == "VERIFIED"
+            and all(
+                claim.is_supported
+                for claim in self.claims
+            )
+        )
