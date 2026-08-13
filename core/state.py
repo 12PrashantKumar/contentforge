@@ -21,3 +21,9 @@ class SpineState(TypedDict, total=False):
     status: str        # 'ok' | 'no_findings' | 'insufficient_input'
                        # | 'write_failed' | 'all_blocked' | 'error'
     error: str         # human-readable failure detail, '' when fine
+
+     # first-party flags, set by the interview flow, read by strategy
+    is_first_party: bool
+    has_real_completion: bool
+    has_real_failure: bool
+    has_real_measurement: bool

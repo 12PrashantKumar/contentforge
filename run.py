@@ -8,7 +8,7 @@ def main():
     graph = build_graph()
 
     # single run, linear spine. archetype is fixed this week.
-    initial = {"days": 1}
+    initial = {"days": 7}
     final = graph.invoke(initial)
 
     status = final.get("status")
@@ -35,7 +35,9 @@ def main():
     if status == "error":
         print("A node raised. See ERROR above.")
         return
-
+    if status == "nothing_to_post":
+        print("Nothing to post this week.")
+        return
     # --- source ---
     finding = final["finding"]
     print("\nSOURCE")
