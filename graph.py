@@ -131,6 +131,7 @@ def verify_node(state: SpineState) -> SpineState:
                 source_text=finding.content,
                 source_url=finding.source_url,
                 model_name=GROQ_MODEL,
+                source_type=finding.source_type,
             )
             verifications[variant.id] = result
     except Exception as exc:

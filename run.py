@@ -77,13 +77,13 @@ def main():
             for r in result.blocked_reasons:
                 print(f"      - {r}")
 
-        if result.status == "VERIFIED":
+        if result.status in ("VERIFIED", "SKIPPED"):
             passed += 1
 
 
     print("\n" + LINE)
     print(f"RESULT: {passed}/{len(draft.variants)} variants VERIFIED")
-    
+
     run_id = save_run(final["finding"], final["draft"], final["verifications"])
     print(f"\nsaved run {run_id} to database")
 

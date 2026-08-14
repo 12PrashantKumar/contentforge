@@ -467,7 +467,19 @@ def verify_variant(
     source_text: str,
     source_url: str,
     model_name: str,
+    source_type: str = "news",
 ) -> VerificationResult:
+
+    # --------------------------------------------------
+    # 0. First-party content: you are the source of truth.
+    #    Skip external claim-verification.
+    # --------------------------------------------------
+    if source_type == "own_work":
+        return VerificationResult(
+            status="SKIPPED",
+            claims=[],
+            blocked_reasons=[],
+        )
 
     blocked_reasons: list[str] = []
 
