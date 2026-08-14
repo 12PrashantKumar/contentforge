@@ -1,4 +1,5 @@
 from graph import build_graph
+from storage.db import save_run
 
 
 LINE = "=" * 78
@@ -79,8 +80,13 @@ def main():
         if result.status == "VERIFIED":
             passed += 1
 
+
     print("\n" + LINE)
     print(f"RESULT: {passed}/{len(draft.variants)} variants VERIFIED")
+    
+    run_id = save_run(final["finding"], final["draft"], final["verifications"])
+    print(f"\nsaved run {run_id} to database")
+
     if final.get("status") == "all_blocked":
         print("All variants blocked. Read the reasons — overstatement is common")
         print("and blocking it is correct, not a bug.")
