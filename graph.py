@@ -77,8 +77,22 @@ def synthesis_node(state: SpineState) -> SpineState:
     if insight is None:
         return {**state, "status": "nothing_interesting", "error": ""}
 
-    print(f"\n[synthesis] worth a teardown: {insight.angle}")
+    print(f"\n[synthesis] {insight.archetype}: {insight.angle}")
     return {**state, "archetype": insight.archetype, "status": "ok", "error": ""}
+
+# arXiv node
+
+from sources.arxiv_source import fetch_papers
+
+def research_arxiv_node(state: SpineState) -> SpineState:
+    try:
+        papers = fetch_papers(max_results=5)
+    except Exception as exc:
+        return {**state, "status": "error", "error": f"arxiv failed: {exc}"}
+    if not papers:
+        return {**state, "status": "no_findings", "error": ""}
+    return {**state, "findings": papers, "finding": papers[0],
+            "status": "ok", "error": ""}
 
 # ----------------------------------------------------------------------
 # node: strategy  (reads the flags the interview set)
@@ -210,4 +224,19 @@ def build_news_graph():
     g.add_edge("write", "verify")
     g.add_edge("verify", END)
 
+    return g.compile()
+
+def build_arxiv_graph():
+    g = StateGraph(SpineState)
+    g.add_node("research", research_arxiv_node)
+    g.add_node("synthesis", synthesis_node)
+    g.add_node("strategy", strategy_node)
+    g.add_node("write", write_node)
+    g.add_node("verify", verify_node)
+    g.add_edge(START, "research")
+    g.add_edge("research", "synthesis")
+    g.add_edge("synthesis", "strategy")
+    g.add_edge("strategy", "write")
+    g.add_edge("write", "verify")
+    g.add_edge("verify", END)
     return g.compile()
