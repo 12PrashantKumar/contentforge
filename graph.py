@@ -11,7 +11,7 @@ from writers.strategy import choose_archetype
 from writers.x_writer import write
 from agents.verifier import verify_variant
 from agents.synthesis import synthesize 
-
+from agents.ranker import pick_best
 
 # ----------------------------------------------------------------------
 # node: interview  (first-party entry point)
@@ -53,6 +53,27 @@ def research_node(state: SpineState) -> SpineState:
 
     return {**state, "findings": findings, "finding": findings[0],
             "status": "ok", "error": ""}
+
+# ----------------------------------------------------------------------
+# node: rank  (external only) - pick the most interesting of the batch
+# ----------------------------------------------------------------------
+def rank_node(state: SpineState) -> SpineState:
+    if state.get("status") != "ok":
+        return state
+
+    findings = state.get("findings", [])
+    if not findings:
+        return {**state, "status": "no_findings", "error": ""}
+
+    print("\n[ranker] scoring the batch:")
+    best, score = pick_best(findings, min_score=6)
+
+    if best is None:
+        return {**state, "status": "nothing_interesting",
+                "error": f"best score was {score}, below the quality floor"}
+
+    print(f"[ranker] picked (score {score}): {best.title[:70]}")
+    return {**state, "finding": best, "status": "ok", "error": ""}
 
 # ----------------------------------------------------------------------
 # node: synthesis  (external sources only)
@@ -212,13 +233,15 @@ def build_news_graph():
     g = StateGraph(SpineState)
 
     g.add_node("research", research_node)
+    g.add_node("rank", rank_node)
     g.add_node("synthesis", synthesis_node)
     g.add_node("strategy", strategy_node)
     g.add_node("write", write_node)
     g.add_node("verify", verify_node)
 
     g.add_edge(START, "research")
-    g.add_edge("research", "synthesis")
+    g.add_edge("research", "rank")
+    g.add_edge("rank", "synthesis")
     g.add_edge("synthesis", "strategy")
     g.add_edge("strategy", "write")
     g.add_edge("write", "verify")
@@ -229,12 +252,15 @@ def build_news_graph():
 def build_arxiv_graph():
     g = StateGraph(SpineState)
     g.add_node("research", research_arxiv_node)
+    g.add_node("rank", rank_node)
     g.add_node("synthesis", synthesis_node)
     g.add_node("strategy", strategy_node)
     g.add_node("write", write_node)
     g.add_node("verify", verify_node)
+    
     g.add_edge(START, "research")
-    g.add_edge("research", "synthesis")
+    g.add_edge("research", "rank")
+    g.add_edge("rank", "synthesis")
     g.add_edge("synthesis", "strategy")
     g.add_edge("strategy", "write")
     g.add_edge("write", "verify")
