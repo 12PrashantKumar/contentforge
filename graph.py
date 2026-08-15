@@ -10,6 +10,7 @@ from sources.interview import run_interview
 from writers.strategy import choose_archetype
 from writers.x_writer import write
 from agents.verifier import verify_variant
+from agents.synthesis import synthesize 
 
 
 # ----------------------------------------------------------------------
@@ -53,12 +54,41 @@ def research_node(state: SpineState) -> SpineState:
     return {**state, "findings": findings, "finding": findings[0],
             "status": "ok", "error": ""}
 
+# ----------------------------------------------------------------------
+# node: synthesis  (external sources only)
+#   Judges news/papers for teardown-worthiness. Skips the unworthy.
+#   Sets archetype = TEARDOWN_THREAD when worth it, so strategy uses it.
+# ----------------------------------------------------------------------
+def synthesis_node(state: SpineState) -> SpineState:
+    if state.get("status") != "ok":
+        return state
+
+    finding = state["finding"]
+
+    # first-party skips synthesis entirely
+    if finding.source_type == "own_work":
+        return state
+
+    try:
+        insight = synthesize(finding)
+    except Exception as exc:
+        return {**state, "status": "error", "error": f"synthesis raised: {exc}"}
+
+    if insight is None:
+        return {**state, "status": "nothing_interesting", "error": ""}
+
+    print(f"\n[synthesis] worth a teardown: {insight.angle}")
+    return {**state, "archetype": insight.archetype, "status": "ok", "error": ""}
 
 # ----------------------------------------------------------------------
 # node: strategy  (reads the flags the interview set)
 # ----------------------------------------------------------------------
 def strategy_node(state: SpineState) -> SpineState:
     if state.get("status") != "ok":
+        return state
+    
+     # if synthesis already chose an archetype (external teardown), use it
+    if state.get("archetype"):
         return state
 
     finding = state["finding"]
@@ -158,6 +188,24 @@ def build_graph():
 
     g.add_edge(START, "interview")
     g.add_edge("interview", "strategy")
+    g.add_edge("strategy", "write")
+    g.add_edge("write", "verify")
+    g.add_edge("verify", END)
+
+    return g.compile()
+
+def build_news_graph():
+    g = StateGraph(SpineState)
+
+    g.add_node("research", research_node)
+    g.add_node("synthesis", synthesis_node)
+    g.add_node("strategy", strategy_node)
+    g.add_node("write", write_node)
+    g.add_node("verify", verify_node)
+
+    g.add_edge(START, "research")
+    g.add_edge("research", "synthesis")
+    g.add_edge("synthesis", "strategy")
     g.add_edge("strategy", "write")
     g.add_edge("write", "verify")
     g.add_edge("verify", END)
