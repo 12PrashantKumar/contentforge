@@ -25,6 +25,7 @@ GROQ_API_KEY = require_env("GROQ_API_KEY")
 TAVILY_API_KEY = require_env("TAVILY_API_KEY")
 GITHUB_TOKEN = require_env("GITHUB_TOKEN")
 CONTENTFORGE_DATABASE_URL = require_env("CONTENTFORGE_DATABASE_URL")
+REDIS_URL = require_env("REDIS_URL")
 
 
 # Has a sensible default, so it doesn't need require_env().

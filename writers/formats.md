@@ -141,15 +141,29 @@ The third line is mandatory; it converts an argument into a conversation.
 
 Cheapest format to produce. Fills gap days without diluting the feed.
 
+Two valid forms:
+
+**Form A — a hands-on fact from your own work** (has a named API/flag/parameter):
 ```
 TIL: {one specific technical fact, with the API/flag/parameter named}
 
 {the consequence in one line}
 ```
 
-Rules: must be something learned in actual work this week. No generic tips.
-If it fits in one line, use one line.
+**Form B — a concrete finding from a paper or source you read** (no API needed,
+but must be a specific, quotable result or finding — not a vague vibe):
+```
+TIL: {the specific finding, result, or claim from the source, stated concretely}
 
+{why it matters in one line}
+```
+
+Rules: Form A must be something learned in actual work this week. Form B must be
+a real, specific finding you can point to in the source — a measured result, a
+concrete observation, or a named effect ("task order changes the outcome"), not a
+vague summary ("this paper is interesting"). If the source has no specific finding
+worth stating plainly, skip it — do not pad. No generic tips. If it fits in one
+line, use one line.
 ---
 
 ## 7. BENCHMARK_COMPARISON

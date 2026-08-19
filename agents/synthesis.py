@@ -1,16 +1,24 @@
 """
-Turns an EXTERNAL finding (news / paper) into a post, routed to an archetype
-the source content can actually FILL. Or skips it.
+agents/synthesis.py
+Turns an EXTERNAL finding (news / paper) into a post, routed to the archetype
+that FITS what the source actually is. Or skips it.
 
-The hard lesson: an abstract has results, not mechanism. Routing everything to
-TEARDOWN_THREAD (which needs mechanism) makes good content fail as
-'insufficient_input'. So synthesis picks the archetype that fits what the
-source actually contains:
+Two lessons, both learned the hard way:
 
-  - a specific factual finding / result / number   -> TIL_SNIPPET   (default)
-  - a strong, debatable technical position          -> CONTRARIAN_TAKE
-  - genuinely detailed mechanism (rare in abstracts)-> TEARDOWN_THREAD
-  - nothing worth posting                            -> None (skip)
+  1. Don't force everything to TEARDOWN - abstracts have results, not mechanism.
+  2. Don't force everything to TIL either - many strong papers are CRITIQUE or
+     ARGUMENT papers whose value is a position, not a crisp number. TIL wants a
+     hard fact; a critique paper has none, so the writer refuses. Those belong
+     in CONTRARIAN_TAKE.
+
+Routing:
+  hard specific result / number / benchmark        -> TIL_SNIPPET
+  a debatable position, critique, or "everyone
+    thinks X but actually Y" argument               -> CONTRARIAN_TAKE
+  genuinely detailed step-by-step mechanism (rare)  -> TEARDOWN_THREAD
+  nothing worth posting                             -> None (skip)
+still holds: be strict, most items skip. But when something IS worth
+posting, route it to a format it can actually fill.
 
 First-party (own_work) never reaches synthesis - it routes via strategy.
 """
@@ -53,36 +61,42 @@ def _parse_json(raw: str):
 _SYNTH_SYSTEM = """You are a strict editor deciding whether, and how, to post about an
 AI/tech source (a paper abstract or a news item).
 
-First decide if it is worth posting at all. Worth posting means: a concrete, real
-artifact (released model, published paper, benchmark result, shipped system) with
-at least one specific, interesting, checkable fact. Rumors, funding rounds, vague
-opinion pieces, and incremental noise are NOT worth posting. Be strict - most
-items should be skipped.
+STEP 1 - worth posting at all?
+Worth posting means a concrete, real artifact OR a genuinely interesting finding,
+argument, or result. Rumors, funding rounds, and vague noise are NOT. Be strict -
+most items should be skipped. If not worth it, say so.
 
-If it IS worth posting, choose the archetype the source can actually support:
+STEP 2 - if worth posting, pick the archetype that FITS what this source actually is:
 
-  TIL_SNIPPET  - DEFAULT. Use when the source has a specific factual finding,
-                 result, or number. Almost any real paper/news qualifies. This is
-                 your safe, reliable choice.
+  TIL_SNIPPET - the source has a HARD, SPECIFIC FACT: a number, a benchmark score,
+      a concrete measured result, a named technique with a crisp takeaway.
+      Example: "achieves 78.3 on PosterBench", "runs in 40 min for under $3".
+      Choose this when there is a specific fact a reader could quote.
 
-  CONTRARIAN_TAKE - Use only when the source makes a strong, debatable technical
-                 claim you could take a real position on. Needs a genuine angle,
-                 not manufactured disagreement.
+  CONTRARIAN_TAKE - reserved for FIRST-PERSON opinions the author actually holds.
+      Do NOT use this for papers or news: a contrarian take requires a position
+      from the author's own experience and a condition under which they'd be
+      wrong. You cannot honestly manufacture that from a source someone else
+      wrote. If a paper's value is an argument rather than a number, express it
+      as a TIL ("TIL: this paper argues/finds X") - that's honest, because the
+      author really did learn it. Do not fake a personal opinion.
 
-  TEARDOWN_THREAD - Use ONLY when the source contains actual MECHANISM detail:
-                 specific components, data flows, how it works step by step. Most
-                 abstracts do NOT have this - they have results, not method. If you
-                 are unsure whether there is real mechanism, do NOT choose teardown.
+  TEARDOWN_THREAD - ONLY when the source has real step-by-step MECHANISM detail
+      (specific components, data flows, how it works). Abstracts rarely do. If
+      unsure, do NOT choose teardown.
 
-When in doubt between archetypes, choose TIL_SNIPPET - it reliably works from
-limited source text.
+Decision rule for external sources: almost everything worth posting becomes a
+TIL_SNIPPET - a hard fact OR an interesting finding/argument, both framed as
+"here's what I learned from this source". Use TEARDOWN only for real mechanism.
+Do NOT use CONTRARIAN for external sources. If the source has no crisp,
+quotable takeaway at all, skip it.
 
 Return ONLY this JSON:
 {"worth_it": true|false,
  "archetype": "TIL_SNIPPET" | "CONTRARIAN_TAKE" | "TEARDOWN_THREAD",
- "key_point": "the specific fact or position to build the post around",
+ "key_point": "the specific fact or the position to build the post around",
  "angle": "one line on the framing",
- "reason": "one line on why this archetype"}
+ "reason": "one line on why this archetype fits"}
 
 If worth_it is false, the other fields may be empty."""
 

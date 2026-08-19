@@ -12,6 +12,7 @@ from writers.x_writer import write
 from agents.verifier import verify_variant
 from agents.synthesis import synthesize 
 from agents.ranker import pick_best
+from services.cache import filter_unseen, mark_seen
 
 # ----------------------------------------------------------------------
 # node: interview  (first-party entry point)
@@ -51,7 +52,11 @@ def research_node(state: SpineState) -> SpineState:
         return {**state, "status": "no_findings", "error": "",
                 "findings": [], "finding": None}
 
-    return {**state, "findings": findings, "finding": findings[0],
+    unseen = filter_unseen(findings)
+    if not unseen:
+        return {**state, "status": "nothing_interesting",
+                "error": "all fetched news already seen"}
+    return {**state, "findings": unseen, "finding": unseen[0],
             "status": "ok", "error": ""}
 
 # ----------------------------------------------------------------------
@@ -112,7 +117,11 @@ def research_arxiv_node(state: SpineState) -> SpineState:
         return {**state, "status": "error", "error": f"arxiv failed: {exc}"}
     if not papers:
         return {**state, "status": "no_findings", "error": ""}
-    return {**state, "findings": papers, "finding": papers[0],
+    unseen = filter_unseen(papers)
+    if not unseen:
+        return {**state, "status": "nothing_interesting",
+                "error": "all fetched papers already seen"}
+    return {**state, "findings": unseen, "finding": unseen[0],
             "status": "ok", "error": ""}
 
 # ----------------------------------------------------------------------
@@ -206,9 +215,14 @@ def verify_node(state: SpineState) -> SpineState:
     all_blocked = all(v.status == "BLOCKED" for v in verifications.values())
     status = "all_blocked" if all_blocked else "ok"
 
+    # mark external findings as seen so we don't re-post them
+    if finding.source_type != "own_work":
+        from services.cache import mark_seen
+        mark_seen(finding)
+
     return {**state, "verifications": verifications,
             "status": status, "error": ""}
-
+ 
 
 # ----------------------------------------------------------------------
 # build + compile  (first-party path this week: interview -> ... -> verify)
