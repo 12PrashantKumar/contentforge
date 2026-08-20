@@ -6,7 +6,7 @@ class Fake:
     source_id: str
     source_url: str = ""
 
-f = Fake(source_id="test:paper:123")
+f = Fake(source_id="test:upstash:123")
 
 print("before:", is_seen(f))   # expect False
 mark_seen(f)

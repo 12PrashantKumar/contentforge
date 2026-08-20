@@ -67,48 +67,43 @@ def build_examples_text(
     )
 
 
-def extract_json(
-    content: str,
-) -> dict:
-    """
-    Parse JSON returned by the LLM.
+def extract_json(content: str) -> dict:
+    """Parse JSON from the LLM. Returns a dict or raises - never None."""
+    import re
 
-    The prompt asks for raw JSON only.
-    This function also handles accidental ```json fences
-    defensively.
-    """
+    if not content or not content.strip():
+        raise ValueError("LLM returned empty content")
 
-    content = content.strip()
+    text = content.strip()
 
-    if content.startswith(
-        "```json"
-    ):
-        content = content[
-            len("```json"):
-        ]
+    # gpt-oss is a reasoning model: strip <think>...</think> blocks first
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+    # also handle an unclosed <think> (truncated) - drop everything up to the last }
+    if "<think>" in text:
+        last_brace = text.rfind("}")
+        if last_brace != -1:
+            # find the matching opening brace region by taking the last {...}
+            first_brace = text.find("{")
+            if first_brace != -1 and first_brace < last_brace:
+                text = text[first_brace:last_brace + 1]
 
-    elif content.startswith(
-        "```"
-    ):
-        content = content[
-            len("```"):
-        ]
-
-    if content.endswith(
-        "```"
-    ):
-        content = content[:-3]
-
-    content = content.strip()
+    fenced = re.search(r"```(?:json)?\s*(.*?)```", text, re.DOTALL)
+    if fenced:
+        text = fenced.group(1).strip()
 
     try:
-        return json.loads(content)
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
 
-    except json.JSONDecodeError as error:
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError:
+            pass
 
-        raise ValueError(
-            "LLM did not return valid JSON."
-        ) from error
+    raise ValueError(f"LLM did not return valid JSON. Got: {content[:300]!r}")
 
 
 def build_generation_prompt(
@@ -213,7 +208,8 @@ def write(
     ):
 
         response = invoke_llm(
-            messages
+            messages,
+            
         )
 
         result = extract_json(
@@ -223,10 +219,12 @@ def write(
         # If the model honestly says the source
         # is insufficient, return that instead of
         # fabricating a post.
+        if result is None:
+            raise ValueError("extract_json returned None - LLM output was not parseable")
+
         if (
             result.get("status")
-            == "insufficient_input"
-        ):
+            == "insufficient_input" ):
 
             return Draft(
                 status="insufficient_input",
